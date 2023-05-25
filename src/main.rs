@@ -16,7 +16,7 @@ fn process_file(joined_data: String, mut file: File) -> Result<(), std::io::Erro
 
 fn replace(line: &str) -> String {
     match &line {
-        x if x.contains("PWD=$(shell pwd)") => "PWD=$(shell pwd) \nBRANCH=$(shell basename $(PWD))".to_string(),
+        x if x.contains("PWD=$(shell pwd)") => "PWD=$(shell pwd)\nBRANCH=$(shell basename $(PWD))".to_string(),
         x if x.contains("NGINX_COMPOSE=-f docker-compose.yml -f") => "NGINX_COMPOSE=-f docker-compose.yml -f ${PWD}/dev/docker-compose.nginx.dev.yml".to_string(),
         x if x.contains("docker build -t local/$") => "\tdocker build -t local/${APP_NAME}-${BRANCH}:latest .".to_string(),
         x if x.contains("USER_UID=${UID} docker-compose ${API_COMPOSE} up -d --force-recreate") => "\tUSER_UID=${UID} IMAGE_NAME=local/${APP_NAME}-${BRANCH}:latest docker-compose ${API_COMPOSE} up -d --force-recreate".to_string(),

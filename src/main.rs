@@ -6,6 +6,14 @@ fn read_lines(filename: String) -> io::Lines<BufReader<File>> {
     return io::BufReader::new(file).lines(); 
 }
 
+fn process_file(joined_data: String, mut file: File) -> Result<(), std::io::Error> {
+    file.write_all(joined_data.as_bytes())?;
+    fs::remove_file("./Makefile")?;
+    fs::rename("Makefile.tmp", "Makefile")?;
+
+    Ok(())
+}
+
 fn replace(line: &str) -> String {
     match &line {
         x if x.contains("PWD=$(shell pwd)") => "PWD=$(shell pwd) \nBRANCH=$(shell basename $(PWD))".to_string(),
@@ -18,7 +26,7 @@ fn replace(line: &str) -> String {
  
 fn main() -> std::io::Result<()> {
     let lines = read_lines("./Makefile".to_string());
-    let mut file = File::create("Makefile.tmp")?;
+    let file = File::create("Makefile.tmp")?;
 
     let mut data = vec![];
     
@@ -26,12 +34,7 @@ fn main() -> std::io::Result<()> {
         data.push(replace(line?.as_str()));
     }
 
-    let joined_data = data.join("\n");
-
-    file.write_all(joined_data.as_bytes())?;
-
-    fs::remove_file("./Makefile")?;
-    fs::rename("Makefile.tmp", "Makefile")?;
+    process_file(data.join("\n"), file)?;
 
     Ok(())
 }

@@ -5,22 +5,15 @@ use std::path::Path;
 fn read_lines<P>(filename: P) -> io::Result<io::Lines<BufReader<File>>>
 where P: AsRef<Path>,
 {
-    match File::open(filename) {
-        Ok(file) => Ok(io::BufReader::new(file).lines()),
-        Err(error) => Err(error)
-    }
+    let file = File::open(filename)?;
+    Ok(io::BufReader::new(file).lines())
 }
 
 fn process_file(joined_data: String, mut file: File) -> Result<(), std::io::Error> {
-    match file.write_all(joined_data.as_bytes()) {
-        Ok(_) => {
-            fs::remove_file("./Makefile")?;
-            fs::rename("Makefile.tmp", "Makefile")?;
-            println!("Successfully wrote to Makefile");
-            Ok(())
-        },
-        Err(why) => panic!("Couldn't write to Makefile {}", why)
-    }
+        file.write_all(joined_data.as_bytes())?;
+        fs::remove_file("./Makefile")?;
+        fs::rename("Makefile.tmp", "Makefile")?;
+        Ok(())
 }
 
 fn replace(line: String) -> String {
@@ -37,7 +30,6 @@ fn main() -> std::io::Result<()> {
     match read_lines("./Makefile".to_string()) {
         Ok(lines) => {
             let file = File::create("Makefile.tmp")?;
-
             let mut data = vec![];
             
             for line in lines {
@@ -45,10 +37,10 @@ fn main() -> std::io::Result<()> {
             }
 
             process_file(data.join("\n"), file)?;
-
+            println!("Successfully wrote to Makefile");
             Ok(())
         },
-        Err(err) => Err(err)
+        Err(why) => panic!("Couldn't write to Makefile {}", why)
     }
 }
 

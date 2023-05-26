@@ -5,16 +5,22 @@ use std::path::Path;
 fn read_lines<P>(filename: P) -> io::Result<io::Lines<BufReader<File>>>
 where P: AsRef<Path>,
 {
-    let file = File::open(filename)?; 
-    Ok(io::BufReader::new(file).lines())
+    match File::open(filename) {
+        Ok(file) => Ok(io::BufReader::new(file).lines()),
+        Err(error) => Err(error)
+    }
 }
 
 fn process_file(joined_data: String, mut file: File) -> Result<(), std::io::Error> {
-    file.write_all(joined_data.as_bytes())?;
-    fs::remove_file("./Makefile")?;
-    fs::rename("Makefile.tmp", "Makefile")?;
-
-    Ok(())
+    match file.write_all(joined_data.as_bytes()) {
+        Ok(_) => {
+            fs::remove_file("./Makefile")?;
+            fs::rename("Makefile.tmp", "Makefile")?;
+            println!("Successfully wrote to Makefile");
+            Ok(())
+        },
+        Err(why) => panic!("Couldn't write to Makefile {}", why)
+    }
 }
 
 fn replace(line: String) -> String {

@@ -34,17 +34,21 @@ fn replace(line: String) -> String {
 }
  
 fn main() -> std::io::Result<()> {
-    if let Ok(lines) = read_lines("./Makefile".to_string()) {
-        let file = File::create("Makefile.tmp")?;
+    match read_lines("./Makefile".to_string()) {
+        Ok(lines) => {
+            let file = File::create("Makefile.tmp")?;
 
-        let mut data = vec![];
-        
-        for line in lines {
-            data.push(replace(line?));
-        }
+            let mut data = vec![];
+            
+            for line in lines {
+                data.push(replace(line?));
+            }
 
-        process_file(data.join("\n"), file)?;
-    };
-    Ok(())
+            process_file(data.join("\n"), file)?;
+
+            Ok(())
+        },
+        Err(err) => Err(err)
+    }
 }
 
